@@ -7,7 +7,10 @@ import fmt "core:fmt"
 main :: proc() {
     rl.InitWindow(320, 480, "Tiled Example")
 
-    tiled_map := tiled.parse_tilemap("tileMap.json")
+    tiled_map, ok := tiled.parse_tilemap("tileMap.json")
+	if !ok {
+		fmt.eprintln("parse_tilemap: failed")
+	}
 
     tileset_texture := rl.LoadTexture("tiles.png")
 
