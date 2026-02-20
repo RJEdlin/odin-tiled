@@ -99,11 +99,23 @@ cook_layer_draw_buffers :: proc(bag: Map_Bag) {
 	}
 }
 
+/*
+Note that this doesn't delete the bag's contents. It just unloads textures from VRAM.
+If you want to empty the bag, the easiest way is to have allocated it to an arena in the first place. Then you
+can just free the arena after calling this. Otherwise, you have to go through and free everything in it.
+Much more work.
+*/
 unload_map_bag :: proc(bag: ^Map_Bag) {
-	panic("WTF YOU DIDN'T IMPLEMENT UNLOADING THE BAG")
+	for t in bag^.atlases {
+		rl.UnloadTexture(t)
+	}
+
+	for rt in bag^.layer_draw_buffers {
+		rl.UnloadRenderTexture(rt)
+	}
 }
 
-/** Remember to unload the atlases created using `unload_atlases` when they are no longer needed
+/** Remember to unload the atlases created when they are no longer needed
  *
  */
 load_atlases_for :: proc(path_map: string, t_map: tiled.Map, alloc := context.allocator) -> ([]rl.Texture2D, Error) {
@@ -129,12 +141,6 @@ load_atlases_for :: proc(path_map: string, t_map: tiled.Map, alloc := context.al
 	}
 	fmt.println("Succeeded")
 	return arr, .None
-}
-
-unload_atlases :: proc(atlases: []rl.Texture2D) {
-	for t in atlases {
-		rl.UnloadTexture(t)
-	}
 }
 
 // Must be called between Begin and End calls
