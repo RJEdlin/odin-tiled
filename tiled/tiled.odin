@@ -9,9 +9,7 @@ import fmt "core:fmt"
 	https://doc.mapeditor.org/en/stable/reference/json-map-format/
 
 	TODO:
-		- This needs to be extensively tested. You can help by e.g.
-		  sending me your Tiled files (as JSON) in order to give me
-		  testing material.
+		- This needs to be extensively tested.
 		- Comment all fields with the description in the link above.
 		  Textually separate optional fields and describe them as such.
 		- Add the omitempty tag where appropriate.
@@ -50,8 +48,13 @@ parse_tilemap_and_tilesets :: proc(path: string, alloc := context.allocator) -> 
 	}
 	for &ts in m.tilesets {
 		if ts.source == "" do continue
-		ts_path, err := os.join_path({path, ts.source}, alloc)
-		if err != nil {
+		wd, err1 := os.get_working_directory(context.temp_allocator)
+		if err1 != nil {
+			fmt.eprintln("ODIN_TILED: Could not get working directory")
+		}
+		dir, _ := os.split_path(path)
+		ts_path, err2 := os.join_path({dir, ts.source}, context.temp_allocator)
+		if err2 != nil {
 			fmt.eprintln("ODIN_TILED: Could not format path to tileset", path, ts.source)
 		}
 		external_ts, ok := parse_tileset(ts_path, alloc)
